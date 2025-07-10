@@ -1,5 +1,3 @@
-import { Link } from "@tanstack/react-router";
-
 export function Footer() {
   return (
     <footer className="border-t bg-background mt-auto">
@@ -23,7 +21,7 @@ export function Footer() {
             </div>
 
             {/* Navigation Links */}
-            <div className="flex items-center gap-8">
+            <div className="hidden md:flex items-center gap-8">
               <p className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
                 TaskFlow - v1.0.0
               </p>

@@ -8,7 +8,7 @@ export const Route = createFileRoute("/auth/forgot-password")({
 
 function ForgotPassword() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="flex items-center justify-center min-h-[calc(100vh-200px)]">
       <div className="max-w-md w-full space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">

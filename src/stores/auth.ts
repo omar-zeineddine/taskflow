@@ -34,7 +34,7 @@ export const useAuthStore = create<AuthState>()(
       signIn: async (email: string, password: string) => {
         set({ isLoading: true });
         try {
-          const { error } = await supabase.auth.signInWithPassword({
+          const { data, error } = await supabase.auth.signInWithPassword({
             email,
             password,
           });
@@ -44,8 +44,19 @@ export const useAuthStore = create<AuthState>()(
             return { error: error.message };
           }
 
-          // Don't set user/session here - let onAuthStateChange handle it
-          set({ isLoading: false });
+          // Manually set the user/session immediately after successful login
+          // This ensures the state is updated right away
+          if (data.user && data.session) {
+            set({
+              user: data.user,
+              session: data.session,
+              isLoading: false,
+            });
+          }
+          else {
+            set({ isLoading: false });
+          }
+
           return { error: null };
         }
         catch (err) {
@@ -83,8 +94,12 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true });
         try {
           await supabase.auth.signOut();
-          // Don't manually set user/session - let onAuthStateChange handle it
-          set({ isLoading: false });
+          // Manually clear the state to ensure immediate UI update
+          set({
+            user: null,
+            session: null,
+            isLoading: false,
+          });
         }
         catch (err) {
           console.error("Sign out error:", err);
@@ -95,7 +110,6 @@ export const useAuthStore = create<AuthState>()(
       initialize: async () => {
         // Prevent multiple concurrent initializations
         if (isInitializing) {
-          console.log("Auth initialization already in progress");
           return;
         }
 
@@ -109,8 +123,7 @@ export const useAuthStore = create<AuthState>()(
           }
 
           // Set up auth state change listener first
-          authListener = supabase.auth.onAuthStateChange((event, session) => {
-            console.log("Auth state change:", event, session?.user?.id);
+          authListener = supabase.auth.onAuthStateChange((_event, session) => {
             set({
               user: session?.user ?? null,
               session,
@@ -217,6 +230,5 @@ if (typeof window !== "undefined") {
   // Handle SPA navigation (for React Router, etc.)
   window.addEventListener("popstate", () => {
     // Don't cleanup on navigation, just log
-    console.log("Navigation detected - auth listener remains active");
   });
 }

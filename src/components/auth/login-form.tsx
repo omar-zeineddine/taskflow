@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -24,9 +24,9 @@ const loginSchema = z.object({
 type LoginForm = z.infer<typeof loginSchema>;
 
 export function LoginForm() {
-  const { signIn, isLoading } = useAuthStore();
+  const { signIn, isLoading, user } = useAuthStore();
   const navigate = useNavigate();
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = React.useState<string | null>(null);
 
   const form = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
@@ -36,15 +36,18 @@ export function LoginForm() {
     },
   });
 
+  // Watch for user state changes and navigate when user is authenticated
+  useEffect(() => {
+    if (user && !error) {
+      navigate({ to: "/dashboard" });
+    }
+  }, [user, error, navigate]);
+
   async function onSubmit(values: LoginForm) {
     setError(null);
     const { error } = await signIn(values.email, values.password);
-
     if (error) {
       setError(error);
-    }
-    else {
-      navigate({ to: "/dashboard" });
     }
   }
 

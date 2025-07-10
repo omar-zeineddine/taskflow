@@ -45,12 +45,12 @@ export function Header() {
           <div className="hidden md:flex items-center space-x-4">
             {user
               ? (
-                  <Button onClick={signOut} variant="outline" size="sm">
+                  <Button onClick={signOut} variant="outline" size="sm" className="cursor-pointer">
                     Sign Out
                   </Button>
                 )
               : (
-                  <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-4 px-2">
                     <Link
                       to="/auth/login"
                       className="text-sm font-medium transition-colors hover:text-foreground text-foreground/80"
@@ -58,7 +58,7 @@ export function Header() {
                       Login
                     </Link>
                     <Link to="/auth/register">
-                      <Button size="sm">Register</Button>
+                      <Button size="sm" className="cursor-pointer">Register</Button>
                     </Link>
                   </div>
                 )}
@@ -82,17 +82,17 @@ export function Header() {
       {isMenuOpen && (
         <div id="mobile-menu" className="md:hidden border-t bg-background">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <nav className="flex flex-col space-y-4 py-4">
+            <nav className="flex flex-col space-y-4 py-4 px-2">
               <Link
                 to="/"
-                className="text-base font-medium transition-colors hover:text-foreground text-foreground/80 py-2"
+                className="text-base font-medium transition-colors hover:text-foreground hover:bg-accent text-foreground/80 py-2 px-2 rounded-md -mx-2"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Home
               </Link>
               <Link
                 to="/about"
-                className="text-base font-medium transition-colors hover:text-foreground text-foreground/80 py-2"
+                className="text-base font-medium transition-colors hover:text-foreground hover:bg-accent text-foreground/80 py-2 px-2 rounded-md -mx-2"
                 onClick={() => setIsMenuOpen(false)}
               >
                 About
@@ -100,40 +100,40 @@ export function Header() {
               {user && (
                 <Link
                   to="/dashboard"
-                  className="text-base font-medium transition-colors hover:text-foreground text-foreground/80 py-2"
+                  className="text-base font-medium transition-colors hover:text-foreground hover:bg-accent text-foreground/80 py-2 px-2 rounded-md -mx-2"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Dashboard
                 </Link>
               )}
-              <div className="flex flex-col space-y-3 pt-4 border-t">
+              <div className="flex flex-col space-y-3 pt-4 border-t px-2">
                 {user
                   ? (
-                      <Button
+                      <button
                         onClick={() => {
                           signOut();
                           setIsMenuOpen(false);
                         }}
-                        variant="outline"
-                        size="sm"
-                        className="w-fit"
+                        className="text-base font-medium transition-colors hover:text-foreground hover:bg-accent text-foreground/80 py-2 px-2 rounded-md -mx-2 text-left cursor-pointer"
                       >
                         Sign Out
-                      </Button>
+                      </button>
                     )
                   : (
                       <div className="flex flex-col space-y-3">
                         <Link
                           to="/auth/login"
-                          className="text-base font-medium transition-colors hover:text-foreground text-foreground/80"
+                          className="text-base font-medium transition-colors hover:text-foreground hover:bg-accent text-foreground/80 py-2 px-2 rounded-md -mx-2"
                           onClick={() => setIsMenuOpen(false)}
                         >
                           Login
                         </Link>
-                        <Link to="/auth/register" onClick={() => setIsMenuOpen(false)}>
-                          <Button size="sm" className="w-fit">
-                            Register
-                          </Button>
+                        <Link
+                          to="/auth/register"
+                          className="text-base font-medium transition-colors hover:text-foreground hover:bg-accent text-foreground/80 py-2 px-2 rounded-md -mx-2"
+                          onClick={() => setIsMenuOpen(false)}
+                        >
+                          Register
                         </Link>
                       </div>
                     )}
