@@ -70,7 +70,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
 
   createTask: async (taskData: CreateTaskRequest) => {
     set({ loading: true, error: null });
-    
+
     // Create optimistic task
     const optimisticTask = {
       id: `temp-${Date.now()}`,
@@ -90,11 +90,11 @@ export const useTaskStore = create<TaskState>((set, get) => ({
 
     try {
       const newTask = await TaskService.createTask(taskData);
-      
+
       // Replace optimistic task with real one
       set(state => ({
         tasks: state.tasks.map(task =>
-          task.id === optimisticTask.id ? { ...newTask, assignee: optimisticTask.assignee } : task
+          task.id === optimisticTask.id ? { ...newTask, assignee: optimisticTask.assignee } : task,
         ),
         loading: false,
       }));
@@ -114,12 +114,12 @@ export const useTaskStore = create<TaskState>((set, get) => ({
 
   updateTask: async (id: string, taskData: UpdateTaskRequest) => {
     set({ loading: true, error: null });
-    
+
     // Optimistic update - update UI immediately
     const previousTasks = get().tasks;
     set(state => ({
       tasks: state.tasks.map(task =>
-        task.id === id ? { ...task, ...taskData } : task
+        task.id === id ? { ...task, ...taskData } : task,
       ),
     }));
 
@@ -141,7 +141,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
 
   deleteTask: async (id: string) => {
     set({ loading: true, error: null });
-    
+
     // Optimistic delete - remove from UI immediately
     const previousTasks = get().tasks;
     set(state => ({
@@ -182,36 +182,41 @@ export const useTaskStore = create<TaskState>((set, get) => ({
         },
         async (payload) => {
           const { eventType, new: newRecord, old: oldRecord } = payload;
-          
+
           if (eventType === "INSERT" && newRecord) {
-            // Add the new task to the store immediately
-            const taskWithAssignee = await TaskService.getTaskById(newRecord.id);
-            if (taskWithAssignee) {
-              set(state => ({
-                tasks: [taskWithAssignee, ...state.tasks],
-              }));
+            // Check if task already exists (to avoid duplicates from optimistic updates)
+            const existingTask = get().tasks.find(task => task.id === newRecord.id);
+            if (!existingTask) {
+              const taskWithAssignee = await TaskService.getTaskById(newRecord.id);
+              if (taskWithAssignee) {
+                set(state => ({
+                  tasks: [taskWithAssignee, ...state.tasks],
+                }));
+              }
             }
-          } else if (eventType === "UPDATE" && newRecord) {
+          }
+          else if (eventType === "UPDATE" && newRecord) {
             // Update the existing task in the store immediately
             const taskWithAssignee = await TaskService.getTaskById(newRecord.id);
             if (taskWithAssignee) {
               set(state => ({
                 tasks: state.tasks.map(task =>
-                  task.id === newRecord.id ? taskWithAssignee : task
+                  task.id === newRecord.id ? taskWithAssignee : task,
                 ),
                 recentlyUpdatedTasks: new Set([...state.recentlyUpdatedTasks, newRecord.id]),
               }));
-              
+
               // Remove from recently updated after 2 seconds
               setTimeout(() => {
-                set(state => {
+                set((state) => {
                   const newSet = new Set(state.recentlyUpdatedTasks);
                   newSet.delete(newRecord.id);
                   return { recentlyUpdatedTasks: newSet };
                 });
               }, 2000);
             }
-          } else if (eventType === "DELETE" && oldRecord) {
+          }
+          else if (eventType === "DELETE" && oldRecord) {
             // Remove the task from the store immediately
             set(state => ({
               tasks: state.tasks.filter(task => task.id !== oldRecord.id),
@@ -230,10 +235,10 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     set(state => ({
       recentlyUpdatedTasks: new Set([...state.recentlyUpdatedTasks, id]),
     }));
-    
+
     // Remove from recently updated after 2 seconds
     setTimeout(() => {
-      set(state => {
+      set((state) => {
         const newSet = new Set(state.recentlyUpdatedTasks);
         newSet.delete(id);
         return { recentlyUpdatedTasks: newSet };
