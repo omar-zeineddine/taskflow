@@ -23,7 +23,7 @@ export function Footer() {
             {/* Navigation Links */}
             <div className="hidden md:flex items-center gap-8">
               <p className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-                TaskFlow - v1.0.0
+                TaskFlow - v 1.0.0
               </p>
             </div>
           </div>

@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 import { ProtectedRoute } from "@/components/auth";
 import { TaskEditModal } from "@/components/tasks";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useTaskStore } from "@/stores/tasks";
 
 export const Route = createFileRoute("/tasks/$taskId/")({
@@ -16,6 +18,7 @@ function TaskDetailPage() {
   const navigate = useNavigate();
   const { getTaskById, deleteTask, fetchTasks } = useTaskStore();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
   const task = getTaskById(taskId);
@@ -27,44 +30,53 @@ function TaskDetailPage() {
   }, [task, fetchTasks]);
 
   const handleDelete = async () => {
-    if (window.confirm("Are you sure you want to delete this task?")) {
-      setIsDeleting(true);
-      try {
-        await deleteTask(taskId);
-        navigate({ to: "/tasks" });
-      }
-      catch (error) {
-        console.error("Failed to delete task:", error);
-      }
-      finally {
-        setIsDeleting(false);
-      }
+    setIsDeleting(true);
+    try {
+      await deleteTask(taskId);
+      setIsDeleteDialogOpen(false);
+      navigate({ to: "/tasks" });
+    }
+    catch (error) {
+      console.error("Failed to delete task:", error);
+    }
+    finally {
+      setIsDeleting(false);
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case "To Do":
-        return "bg-gray-100 text-gray-800";
+        return "bg-secondary text-secondary-foreground border-secondary";
       case "In Progress":
-        return "bg-blue-100 text-blue-800";
+        return "bg-primary/10 text-primary border-primary/20";
       case "Done":
-        return "bg-green-100 text-green-800";
+        return "bg-green-100 text-green-800 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800";
       default:
-        return "bg-gray-100 text-gray-800";
+        return "bg-secondary text-secondary-foreground border-secondary";
     }
   };
 
   if (!task) {
     return (
       <ProtectedRoute>
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center">
-            <p className="text-muted-foreground">Task not found</p>
-            <Button className="mt-4" onClick={() => navigate({ to: "/tasks" })}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Tasks
-            </Button>
+        <div className="min-h-screen bg-background">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <Card className="max-w-md mx-auto">
+              <CardContent className="pt-6">
+                <div className="text-center space-y-4">
+                  <div className="text-muted-foreground">
+                    <Trash2 className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p className="text-lg font-medium">Task not found</p>
+                    <p className="text-sm">The task you're looking for doesn't exist or has been deleted.</p>
+                  </div>
+                  <Button onClick={() => navigate({ to: "/tasks" })} className="w-full">
+                    <ArrowLeft className="h-4 w-4 mr-2" />
+                    Back to Tasks
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </ProtectedRoute>
@@ -73,100 +85,192 @@ function TaskDetailPage() {
 
   return (
     <ProtectedRoute>
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-6">
-          <Button variant="ghost" onClick={() => navigate({ to: "/tasks" })}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Tasks
-          </Button>
-        </div>
+      <div className="min-h-screen bg-background">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Header with back button */}
+          <div className="mb-8">
+            <Button variant="ghost" onClick={() => navigate({ to: "/tasks" })} className="mb-4">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Tasks
+            </Button>
 
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-white border rounded-lg p-6">
-            <div className="flex justify-between items-start mb-6">
-              <div className="flex-1">
-                <h1 className="text-2xl font-bold mb-2">{task.title}</h1>
-                <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(task.status)}`}>
-                  {task.status}
-                </span>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="flex-1 min-w-0">
+                <h1 className="text-3xl font-bold tracking-tight text-foreground mb-2 break-words">
+                  {task.title}
+                </h1>
+                <div className="flex items-center gap-3">
+                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(task.status)}`}>
+                    {task.status}
+                  </span>
+                  <span className="text-sm text-muted-foreground">
+                    Created
+                    {" "}
+                    {new Date(task.created_at).toLocaleDateString()}
+                  </span>
+                </div>
               </div>
-              <div className="flex space-x-2">
+
+              <div className="flex items-center gap-2">
                 <Button
                   variant="outline"
                   onClick={() => setIsEditModalOpen(true)}
+                  className="flex-1 sm:flex-none"
                 >
                   <Edit className="h-4 w-4 mr-2" />
-                  Edit
+                  Edit Task
                 </Button>
                 <Button
                   variant="destructive"
-                  onClick={handleDelete}
+                  onClick={() => setIsDeleteDialogOpen(true)}
                   disabled={isDeleting}
+                  className="flex-1 sm:flex-none"
                 >
                   <Trash2 className="h-4 w-4 mr-2" />
-                  {isDeleting ? "Deleting..." : "Delete"}
+                  Delete
                 </Button>
               </div>
             </div>
+          </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-              <div>
-                <h3 className="font-semibold text-sm text-muted-foreground mb-2">ASSIGNEE</h3>
-                {task.assignee
-                  ? (
-                      <div className="flex items-center space-x-2">
-                        <User className="h-4 w-4 text-muted-foreground" />
-                        <span>{task.assignee.name}</span>
-                        <span className="text-sm text-muted-foreground">
-                          (
-                          {task.assignee.email}
-                          )
-                        </span>
-                      </div>
-                    )
-                  : (
-                      <span className="text-muted-foreground">No assignee</span>
-                    )}
-              </div>
-
-              <div>
-                <h3 className="font-semibold text-sm text-muted-foreground mb-2">CREATED</h3>
-                <div className="flex items-center space-x-2">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <span>{new Date(task.created_at).toLocaleDateString()}</span>
-                </div>
-              </div>
+          {/* Main content */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Task details */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Description */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Description</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {task.description
+                    ? (
+                        <div className="prose prose-sm max-w-none dark:prose-invert">
+                          <p className="whitespace-pre-wrap text-foreground leading-relaxed">
+                            {task.description}
+                          </p>
+                        </div>
+                      )
+                    : (
+                        <p className="text-muted-foreground italic">No description provided</p>
+                      )}
+                </CardContent>
+              </Card>
             </div>
 
-            {task.description && (
-              <div>
-                <h3 className="font-semibold text-sm text-muted-foreground mb-2">DESCRIPTION</h3>
-                <div className="prose max-w-none">
-                  <p className="text-sm whitespace-pre-wrap">{task.description}</p>
-                </div>
-              </div>
-            )}
+            {/* Sidebar */}
+            <div className="space-y-6">
+              {/* Assignee */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <User className="h-5 w-5" />
+                    Assignee
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {task.assignee
+                    ? (
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-3">
+                            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                              <User className="h-5 w-5 text-primary" />
+                            </div>
+                            <div>
+                              <p className="font-medium text-foreground">{task.assignee.name}</p>
+                              <p className="text-sm text-muted-foreground">{task.assignee.email}</p>
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    : (
+                        <div className="flex items-center gap-3 text-muted-foreground">
+                          <div className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center">
+                            <User className="h-5 w-5" />
+                          </div>
+                          <p className="italic">No assignee</p>
+                        </div>
+                      )}
+                </CardContent>
+              </Card>
 
-            <div className="mt-6 pt-6 border-t">
-              <div className="text-xs text-muted-foreground">
-                Last updated:
-                {" "}
-                {new Date(task.updated_at).toLocaleDateString()}
-                {" "}
-                at
-                {" "}
-                {new Date(task.updated_at).toLocaleTimeString()}
-              </div>
+              {/* Timeline */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Calendar className="h-5 w-5" />
+                    Timeline
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-foreground">Created</span>
+                      <span className="text-sm text-muted-foreground">
+                        {new Date(task.created_at).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-foreground">Last updated</span>
+                      <span className="text-sm text-muted-foreground">
+                        {new Date(task.updated_at).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
+                      </span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </div>
         </div>
       </div>
 
+      {/* Edit Modal */}
       <TaskEditModal
         task={task}
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
       />
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Trash2 className="h-5 w-5 text-destructive" />
+              Delete Task
+            </DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete "
+              {task.title}
+              "? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setIsDeleteDialogOpen(false)}
+              disabled={isDeleting}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={isDeleting}
+            >
+              {isDeleting ? "Deleting..." : "Delete Task"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </ProtectedRoute>
   );
 }
