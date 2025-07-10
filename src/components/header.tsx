@@ -7,6 +7,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/stores/auth";
 
+import { ModeToggle } from "./toggle";
+
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user, signOut } = useAuthStore();
@@ -42,6 +44,7 @@ export function Header() {
 
           {/* Desktop Auth Actions */}
           <div className="hidden md:flex items-center space-x-4">
+            <ModeToggle />
             {user
               ? (
                   <Button onClick={signOut} variant="outline" size="sm" className="cursor-pointer">
