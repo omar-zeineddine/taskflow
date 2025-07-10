@@ -7,9 +7,9 @@ type ProtectedRouteProps = {
 };
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { user, isInitialized } = useAuthStore();
+  const { user, isInitialized, isLoading } = useAuthStore();
 
-  if (!isInitialized) {
+  if (!isInitialized || isLoading) {
     return <div>Loading...</div>;
   }
 

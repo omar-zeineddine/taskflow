@@ -21,22 +21,21 @@ export function Header() {
               <span className="font-bold text-xl">TaskFlow</span>
             </Link>
             <nav className="hidden md:flex items-center space-x-8 ml-8">
-              <Link to="/" className="text-sm font-medium transition-colors hover:text-foreground text-foreground/80">
-                Home
-              </Link>
-              <Link
-                to="/about"
-                className="text-sm font-medium transition-colors hover:text-foreground text-foreground/80"
-              >
-                About
-              </Link>
               {user && (
-                <Link
-                  to="/dashboard"
-                  className="text-sm font-medium transition-colors hover:text-foreground text-foreground/80"
-                >
-                  Dashboard
-                </Link>
+                <>
+                  <Link
+                    to="/dashboard"
+                    className="text-sm font-medium transition-colors hover:text-foreground text-foreground/80"
+                  >
+                    Dashboard
+                  </Link>
+                  <Link
+                    to="/tasks"
+                    className="text-sm font-medium transition-colors hover:text-foreground text-foreground/80"
+                  >
+                    Tasks
+                  </Link>
+                </>
               )}
             </nav>
           </div>

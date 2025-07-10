@@ -211,11 +211,9 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: "auth-storage",
-      // Only persist initialization state, not user/session data
-      // This prevents stale session issues
-      partialize: state => ({
-        isInitialized: state.isInitialized,
-      }),
+      // Don't persist any auth state - let Supabase handle persistence
+      // This prevents stale session issues on page reload
+      partialize: () => ({}),
     },
   ),
 );
