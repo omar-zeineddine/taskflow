@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 
+import { Spinner } from "@/components/ui/spinner";
 import { useAuthCleanup } from "@/hooks/use-auth-cleanup";
 import { useAuthStore } from "@/stores/auth";
 
@@ -20,7 +21,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [initialize, isInitialized]);
 
   if (!isInitialized) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Spinner className="text-muted-foreground" />
+      </div>
+    );
   }
 
   return <>{children}</>;

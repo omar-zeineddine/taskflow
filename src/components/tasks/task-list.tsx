@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 
+import { Spinner } from "@/components/ui/spinner";
 import { useTaskStore } from "@/stores/tasks";
 
 import { TaskCard } from "./task-card";
@@ -14,7 +15,7 @@ export function TaskList() {
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <div className="text-sm text-muted-foreground">Loading tasks...</div>
+        <Spinner className="text-muted-foreground" />
       </div>
     );
   }
