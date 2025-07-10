@@ -5,22 +5,32 @@
   "private": true,
   "scripts": {
     "commit": "cz",
+    "watch-routes": "tsr watch",
+    "generate-routes": "tsr generate",
+    "build": "npm run generate-routes && tsc -b && vite build",
     "dev": "vite",
-    "build": "tsc -b && vite build",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.1.1",
+    "@radix-ui/react-label": "^2.1.7",
     "@radix-ui/react-slot": "^1.2.3",
+    "@supabase/supabase-js": "^2.50.4",
     "@tailwindcss/vite": "^4.1.11",
+    "@tanstack/react-router": "^1.125.6",
+    "@tanstack/router-devtools": "^1.125.6",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.525.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-hook-form": "^7.60.0",
     "tailwind-merge": "^3.3.1",
-    "tailwindcss": "^4.1.11"
+    "tailwindcss": "^4.1.11",
+    "zod": "^4.0.2",
+    "zustand": "^5.0.6"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^4.16.2",
