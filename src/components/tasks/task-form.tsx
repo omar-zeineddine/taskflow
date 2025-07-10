@@ -23,7 +23,7 @@ export function TaskForm({ onSuccess, onCancel, defaultValues }: TaskFormProps) 
   const { users, fetchUsers, createTask, loading } = useTaskStore();
 
   const form = useForm<CreateTaskInput>({
-    resolver: zodResolver(CreateTaskSchema) as any,
+    resolver: zodResolver(CreateTaskSchema),
     defaultValues: {
       title: "",
       description: "",
@@ -126,8 +126,8 @@ export function TaskForm({ onSuccess, onCancel, defaultValues }: TaskFormProps) 
             <FormItem>
               <FormLabel>Assignee</FormLabel>
               <Select
-                onValueChange={field.onChange}
-                defaultValue={field.value || undefined}
+                onValueChange={value => field.onChange(value === "none" ? "" : value)}
+                defaultValue={field.value || "none"}
               >
                 <FormControl>
                   <SelectTrigger className="w-full">
@@ -142,7 +142,7 @@ export function TaskForm({ onSuccess, onCancel, defaultValues }: TaskFormProps) 
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="">
+                  <SelectItem value="none">
                     <span className="text-muted-foreground">No assignee</span>
                   </SelectItem>
                   {users.map(user => (
