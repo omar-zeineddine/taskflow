@@ -39,9 +39,9 @@ export function TaskList() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 lg:space-y-4 p-4">
       {tasks.map(task => (
-        <TaskCard key={task.id} task={task} />
+        <TaskCard key={task.id} task={task} setIsEditModalOpen={() => {}} setShowDeleteConfirm={() => {}} isDeleting={false} />
       ))}
     </div>
   );

@@ -4,9 +4,9 @@ export const TaskStatusSchema = z.enum(["To Do", "In Progress", "Done"]);
 
 export const CreateTaskSchema = z.object({
   title: z.string().min(1, "Title is required").max(255, "Title must be less than 255 characters"),
-  description: z.string().optional(),
+  description: z.string().min(1, "Description is required"),
   status: TaskStatusSchema.default("To Do"),
-  assignee_id: z.string().uuid().optional(),
+  assignee_id: z.string().uuid("Assignee is required"),
 });
 
 export const UpdateTaskSchema = z.object({
