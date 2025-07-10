@@ -16,15 +16,15 @@ export const Route = createFileRoute("/auth/register")({
     <div className="flex items-center justify-center min-h-[calc(100vh-200px)]">
       <div className="max-w-md w-full space-y-8">
         <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-foreground">
             Create your account
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
+          <p className="mt-2 text-center text-sm text-muted-foreground">
             Or
             {" "}
             <Link
               to="/auth/login"
-              className="font-medium text-indigo-600 hover:text-indigo-500"
+              className="font-medium text-primary hover:text-primary/80"
             >
               sign in to your existing account
             </Link>
