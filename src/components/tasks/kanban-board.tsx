@@ -27,8 +27,11 @@ const COLUMNS: { id: TaskStatus; title: string }[] = [
 ];
 
 export function KanbanBoard() {
-  const { tasks, loading, error, fetchTasks, updateTask, subscribeToTasks } = useTaskStore();
+  const { tasks, loading, error, fetchTasks, updateTask, subscribeToTasks, getFilteredTasks } = useTaskStore();
   const [activeTask, setActiveTask] = useState<TaskWithAssignee | null>(null);
+
+  // Use filtered tasks instead of all tasks
+  const filteredTasks = getFilteredTasks();
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -64,7 +67,7 @@ export function KanbanBoard() {
   }, [fetchTasks, subscribeToTasks]);
 
   const getTasksByStatus = (status: TaskStatus) => {
-    return tasks.filter(task => task.status === status);
+    return filteredTasks.filter(task => task.status === status);
   };
 
   const handleDragStart = (event: DragStartEvent) => {

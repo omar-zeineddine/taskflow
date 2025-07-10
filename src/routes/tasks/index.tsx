@@ -3,7 +3,7 @@ import { Plus } from "lucide-react";
 import { useState } from "react";
 
 import { ProtectedRoute } from "@/components/auth";
-import { KanbanBoard, TaskForm, TaskModal } from "@/components/tasks";
+import { KanbanBoard, TaskFilters, TaskForm, TaskModal } from "@/components/tasks";
 import { Button } from "@/components/ui/button";
 import { useTaskStore } from "@/stores/tasks";
 
@@ -13,7 +13,7 @@ export const Route = createFileRoute("/tasks/")({
 
 function TasksPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const { error, clearError } = useTaskStore();
+  const { error, clearError, filters, setFilters } = useTaskStore();
 
   return (
     <ProtectedRoute>
@@ -36,6 +36,13 @@ function TasksPage() {
             </div>
           </div>
         )}
+
+        <div className="mb-6">
+          <TaskFilters
+            filters={filters}
+            onFiltersChange={setFilters}
+          />
+        </div>
 
         <KanbanBoard />
 
