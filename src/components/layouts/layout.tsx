@@ -1,5 +1,5 @@
-import { Footer } from "../ui/footer";
-import { Header } from "../ui/header";
+import { Footer } from "../footer";
+import { Header } from "../header";
 
 type LayoutProps = {
   children: React.ReactNode;

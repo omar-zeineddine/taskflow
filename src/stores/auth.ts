@@ -1,0 +1,222 @@
+import type { Session, User } from "@supabase/supabase-js";
+
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+
+import { supabase } from "@/lib/supabase";
+
+export type AuthState = {
+  user: User | null;
+  session: Session | null;
+  isLoading: boolean;
+  isInitialized: boolean;
+  signIn: (email: string, password: string) => Promise<{ error: string | null }>;
+  signUp: (email: string, password: string) => Promise<{ error: string | null }>;
+  signOut: () => Promise<void>;
+  initialize: () => Promise<void>;
+  resetPassword: (email: string) => Promise<{ error: string | null }>;
+  updatePassword: (newPassword: string) => Promise<{ error: string | null }>;
+  cleanup: () => void;
+};
+
+// Store the auth listener reference for cleanup with correct TypeScript type
+let authListener: { data: { subscription: { unsubscribe: () => void } } } | null = null;
+let isInitializing = false;
+
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set, _get) => ({
+      user: null,
+      session: null,
+      isLoading: false,
+      isInitialized: false,
+
+      signIn: async (email: string, password: string) => {
+        set({ isLoading: true });
+        try {
+          const { error } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+          });
+
+          if (error) {
+            set({ isLoading: false });
+            return { error: error.message };
+          }
+
+          // Don't set user/session here - let onAuthStateChange handle it
+          set({ isLoading: false });
+          return { error: null };
+        }
+        catch (err) {
+          set({ isLoading: false });
+          console.error("Sign in error:", err);
+          return { error: "An unexpected error occurred" };
+        }
+      },
+
+      signUp: async (email: string, password: string) => {
+        set({ isLoading: true });
+        try {
+          const { error } = await supabase.auth.signUp({
+            email,
+            password,
+          });
+
+          if (error) {
+            set({ isLoading: false });
+            return { error: error.message };
+          }
+
+          // Don't set user/session here - let onAuthStateChange handle it
+          set({ isLoading: false });
+          return { error: null };
+        }
+        catch (err) {
+          set({ isLoading: false });
+          console.error("Sign up error:", err);
+          return { error: "An unexpected error occurred" };
+        }
+      },
+
+      signOut: async () => {
+        set({ isLoading: true });
+        try {
+          await supabase.auth.signOut();
+          // Don't manually set user/session - let onAuthStateChange handle it
+          set({ isLoading: false });
+        }
+        catch (err) {
+          console.error("Sign out error:", err);
+          set({ isLoading: false });
+        }
+      },
+
+      initialize: async () => {
+        // Prevent multiple concurrent initializations
+        if (isInitializing) {
+          console.log("Auth initialization already in progress");
+          return;
+        }
+
+        isInitializing = true;
+
+        try {
+          // Clean up any existing listener first
+          if (authListener) {
+            authListener.data.subscription.unsubscribe();
+            authListener = null;
+          }
+
+          // Set up auth state change listener first
+          authListener = supabase.auth.onAuthStateChange((event, session) => {
+            console.log("Auth state change:", event, session?.user?.id);
+            set({
+              user: session?.user ?? null,
+              session,
+              isLoading: false,
+            });
+          });
+
+          // Then get initial session
+          const { data: { session }, error } = await supabase.auth.getSession();
+
+          if (error) {
+            console.error("Error getting session:", error);
+          }
+
+          set({
+            user: session?.user ?? null,
+            session,
+            isInitialized: true,
+            isLoading: false,
+          });
+        }
+        catch (err) {
+          console.error("Initialize error:", err);
+          set({
+            isInitialized: true,
+            isLoading: false,
+          });
+        }
+        finally {
+          isInitializing = false;
+        }
+      },
+
+      resetPassword: async (email: string) => {
+        set({ isLoading: true });
+        try {
+          const { error } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: `${window.location.origin}/auth/reset-password`,
+          });
+
+          set({ isLoading: false });
+
+          if (error) {
+            return { error: error.message };
+          }
+
+          return { error: null };
+        }
+        catch (err) {
+          set({ isLoading: false });
+          console.error("Reset password error:", err);
+          return { error: "An unexpected error occurred" };
+        }
+      },
+
+      updatePassword: async (newPassword: string) => {
+        set({ isLoading: true });
+        try {
+          const { error } = await supabase.auth.updateUser({
+            password: newPassword,
+          });
+
+          set({ isLoading: false });
+
+          if (error) {
+            return { error: error.message };
+          }
+
+          return { error: null };
+        }
+        catch (err) {
+          set({ isLoading: false });
+          console.error("Update password error:", err);
+          return { error: "An unexpected error occurred" };
+        }
+      },
+
+      cleanup: () => {
+        if (authListener) {
+          authListener.data.subscription.unsubscribe();
+          authListener = null;
+        }
+        isInitializing = false;
+      },
+    }),
+    {
+      name: "auth-storage",
+      // Only persist initialization state, not user/session data
+      // This prevents stale session issues
+      partialize: state => ({
+        isInitialized: state.isInitialized,
+      }),
+    },
+  ),
+);
+
+// Auto-cleanup on page unload (for non-React environments)
+if (typeof window !== "undefined") {
+  // Handle page unload
+  window.addEventListener("beforeunload", () => {
+    useAuthStore.getState().cleanup();
+  });
+
+  // Handle SPA navigation (for React Router, etc.)
+  window.addEventListener("popstate", () => {
+    // Don't cleanup on navigation, just log
+    console.log("Navigation detected - auth listener remains active");
+  });
+}
