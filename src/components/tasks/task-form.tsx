@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import type { CreateTaskInput } from "@/lib/validations/task";
 import type { TaskStatus } from "@/types/task";
 
+import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -52,6 +53,8 @@ export function TaskForm({ onSuccess, onCancel, defaultValues }: TaskFormProps) 
     { value: "In Progress", label: "In Progress" },
     { value: "Done", label: "Done" },
   ];
+
+  const selectedUser = users.find(user => user.id === form.watch("assignee_id"));
 
   return (
     <Form {...form}>
@@ -128,17 +131,29 @@ export function TaskForm({ onSuccess, onCancel, defaultValues }: TaskFormProps) 
               >
                 <FormControl>
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select assignee" />
+                    <SelectValue placeholder="Select assignee">
+                      {selectedUser && (
+                        <div className="flex items-center gap-2">
+                          <Avatar name={selectedUser.name} email={selectedUser.email} size="sm" />
+                          <span>{selectedUser.name}</span>
+                        </div>
+                      )}
+                    </SelectValue>
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
+                  <SelectItem value="">
+                    <span className="text-muted-foreground">No assignee</span>
+                  </SelectItem>
                   {users.map(user => (
                     <SelectItem key={user.id} value={user.id}>
-                      {user.name}
-                      {" "}
-                      (
-                      {user.email}
-                      )
+                      <div className="flex items-center gap-2">
+                        <Avatar name={user.name} email={user.email} size="sm" />
+                        <div className="flex flex-col">
+                          <span className="font-medium">{user.name}</span>
+                          <span className="text-xs text-muted-foreground">{user.email}</span>
+                        </div>
+                      </div>
                     </SelectItem>
                   ))}
                 </SelectContent>

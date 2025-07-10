@@ -1,7 +1,8 @@
-import { Edit, Trash2, User } from "lucide-react";
+import { Edit, Trash2 } from "lucide-react";
 
 import type { TaskWithAssignee } from "@/types/task";
 
+import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 
 type TaskCardProps = {
@@ -67,14 +68,20 @@ export function TaskCard({
             {task.status}
           </span>
           {task.assignee && (
-            <div className="flex items-center space-x-1 text-xs lg:text-sm text-muted-foreground">
-              <User className="h-3 w-3 lg:h-4 lg:w-4" />
-              <span className="truncate max-w-24 lg:max-w-none">{task.assignee.name}</span>
+            <div className="flex items-center space-x-2 text-xs lg:text-sm">
+              <Avatar name={task.assignee.name} email={task.assignee.email} size="sm" />
+              <span className="truncate max-w-24 lg:max-w-none text-muted-foreground">
+                {task.assignee.name}
+              </span>
             </div>
+          )}
+          {!task.assignee && (
+            <span className="text-xs text-muted-foreground">Unassigned</span>
           )}
         </div>
         <div className="text-xs text-muted-foreground">
           Created:
+          {" "}
           {new Date(task.created_at).toLocaleDateString()}
         </div>
       </div>
