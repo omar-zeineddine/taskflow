@@ -4,6 +4,7 @@ import type { TaskWithAssignee } from "@/types/task";
 
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { getStatusColor } from "@/lib/utils";
 
 type TaskCardProps = {
   task: TaskWithAssignee;
@@ -22,19 +23,6 @@ export function TaskCard({
   setShowDeleteConfirm,
   isDeleting,
 }: TaskCardProps) {
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "To Do":
-        return "bg-secondary text-secondary-foreground";
-      case "In Progress":
-        return "bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary-foreground";
-      case "Done":
-        return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400";
-      default:
-        return "bg-secondary text-secondary-foreground";
-    }
-  };
-
   return (
     <div
       className={`border border-border rounded-lg p-3 lg:p-4 space-y-2 lg:space-y-3 bg-card transition-all duration-300 ${isDragging ? "shadow-lg" : ""} ${isRecentlyUpdated ? "ring-2 ring-primary/50 shadow-md ring-offset-background" : ""}`}

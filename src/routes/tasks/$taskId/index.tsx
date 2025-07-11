@@ -2,11 +2,11 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, Calendar, Edit, Trash2, User } from "lucide-react";
 import { useEffect, useState } from "react";
 
-import { ProtectedRoute } from "@/components/auth";
-import { TaskEditModal } from "@/components/tasks";
+import { ProtectedRoute } from "@/components/auth/protected-route";
+import { TaskEditModal } from "@/components/tasks/task-edit-modal";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { getStatusColor } from "@/lib/utils";
 import { useTaskStore } from "@/stores/tasks";
 
 export const Route = createFileRoute("/tasks/$taskId/")({
@@ -41,19 +41,6 @@ function TaskDetailPage() {
     }
     finally {
       setIsDeleting(false);
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "To Do":
-        return "bg-secondary text-secondary-foreground border-secondary";
-      case "In Progress":
-        return "bg-primary/10 text-primary border-primary/20";
-      case "Done":
-        return "bg-green-100 text-green-800 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800";
-      default:
-        return "bg-secondary text-secondary-foreground border-secondary";
     }
   };
 
@@ -240,37 +227,34 @@ function TaskDetailPage() {
       />
 
       {/* Delete Confirmation Dialog */}
-      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Trash2 className="h-5 w-5 text-destructive" />
-              Delete Task
-            </DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete "
-              {task.title}
-              "? This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="gap-2">
-            <Button
-              variant="outline"
-              onClick={() => setIsDeleteDialogOpen(false)}
-              disabled={isDeleting}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={handleDelete}
-              disabled={isDeleting}
-            >
-              {isDeleting ? "Deleting..." : "Delete Task"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {isDeleteDialogOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <Card className="w-full max-w-md">
+            <CardHeader>
+              <CardTitle className="text-lg text-destructive">Delete Task</CardTitle>
+              <CardDescription>
+                Are you sure you want to delete this task? This action cannot be undone.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setIsDeleteDialogOpen(false)}
+                disabled={isDeleting}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleDelete}
+                disabled={isDeleting}
+              >
+                {isDeleting ? "Deleting..." : "Delete"}
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </ProtectedRoute>
   );
 }

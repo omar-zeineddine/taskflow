@@ -9,6 +9,7 @@ import type { TaskWithAssignee } from "@/types/task";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { getStatusColor } from "@/lib/utils";
 import { useTaskStore } from "@/stores/tasks";
 
 import { TaskEditModal } from "./task-edit-modal";
@@ -62,19 +63,6 @@ function TaskCard({ task, isDragging }: { task: TaskWithAssignee; isDragging: bo
     e.stopPropagation();
     e.preventDefault();
     setShowDeleteConfirm(false);
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "To Do":
-        return "bg-secondary text-secondary-foreground border-border";
-      case "In Progress":
-        return "bg-primary/10 text-primary border-primary/20 dark:bg-primary/20 dark:text-primary-foreground";
-      case "Done":
-        return "bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800";
-      default:
-        return "bg-secondary text-secondary-foreground border-border";
-    }
   };
 
   const formatDate = (dateString: string) => {
