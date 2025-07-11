@@ -11,6 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { UpdateTaskSchema } from "@/lib/validations/task";
+import { useErrorStore } from "@/stores/error";
 import { useTaskStore } from "@/stores/tasks";
 
 import { TaskModal } from "./task-modal";
@@ -23,6 +24,7 @@ type TaskEditModalProps = {
 
 export function TaskEditModal({ task, isOpen, onClose }: TaskEditModalProps) {
   const { users, fetchUsers, updateTask } = useTaskStore();
+  const { handleAsyncError } = useErrorStore();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const form = useForm<UpdateTaskInput>({
@@ -54,7 +56,7 @@ export function TaskEditModal({ task, isOpen, onClose }: TaskEditModalProps) {
       onClose();
     }
     catch (error) {
-      console.error("Failed to update task:", error);
+      handleAsyncError(error, "Failed to update task");
     }
     finally {
       setIsSubmitting(false);

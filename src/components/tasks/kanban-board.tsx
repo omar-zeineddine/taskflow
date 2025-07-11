@@ -1,4 +1,4 @@
-import type { DragEndEvent, DragOverEvent, DragStartEvent } from "@dnd-kit/core";
+import type { CollisionDetection, DragEndEvent, DragOverEvent, DragStartEvent } from "@dnd-kit/core";
 
 import {
   closestCenter,
@@ -14,7 +14,7 @@ import { useEffect, useState } from "react";
 
 import type { TaskStatus, TaskWithAssignee } from "@/types/task";
 
-import { Spinner } from "@/components/ui/spinner";
+import { KanbanBoardSkeleton } from "@/components/ui/skeleton";
 import { useTaskStore } from "@/stores/tasks";
 
 import { KanbanColumn } from "./kanban-column";
@@ -48,7 +48,7 @@ export function KanbanBoard() {
   );
 
   // Custom collision detection that works better for stacked layouts
-  const collisionDetectionStrategy = (args: any) => {
+  const collisionDetectionStrategy: CollisionDetection = (args) => {
     // First, let's see if there are any collisions with the pointer
     const pointerCollisions = pointerWithin(args);
 
@@ -97,8 +97,8 @@ export function KanbanBoard() {
     if (COLUMNS.some(col => col.id === overId)) {
       const newStatus = overId as TaskStatus;
       if (activeTask.status !== newStatus) {
-        // Update task status optimistically for better UX
-        updateTask(activeTask.id, { status: newStatus });
+        // Update task status optimistically for better UX (silent update for drag operations)
+        updateTask(activeTask.id, { status: newStatus }, true);
       }
     }
   };
@@ -124,18 +124,14 @@ export function KanbanBoard() {
     if (COLUMNS.some(col => col.id === overId)) {
       const newStatus = overId as TaskStatus;
       if (activeTask.status !== newStatus) {
-        // Final update to ensure consistency
-        updateTask(activeTask.id, { status: newStatus });
+        // Final update to ensure consistency (silent update for drag operations)
+        updateTask(activeTask.id, { status: newStatus }, true);
       }
     }
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <Spinner className="text-muted-foreground" />
-      </div>
-    );
+    return <KanbanBoardSkeleton />;
   }
 
   if (error) {

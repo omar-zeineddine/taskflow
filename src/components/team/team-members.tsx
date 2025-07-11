@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { TeamMembersSkeleton } from "@/components/ui/skeleton";
 import { useTaskStore } from "@/stores/tasks";
 
 export function TeamMembers() {
@@ -44,24 +45,7 @@ export function TeamMembers() {
   };
 
   if (usersLoading) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Users className="h-5 w-5" />
-            Team Members
-          </CardTitle>
-          <CardDescription>
-            Manage your team and track member activity
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-center py-8">
-            <div className="text-sm text-muted-foreground">Loading team members...</div>
-          </div>
-        </CardContent>
-      </Card>
-    );
+    return <TeamMembersSkeleton />;
   }
 
   const teamStats = getTeamStats();

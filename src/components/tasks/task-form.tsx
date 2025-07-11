@@ -11,6 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CreateTaskSchema } from "@/lib/validations/task";
+import { useErrorStore } from "@/stores/error";
 import { useTaskStore } from "@/stores/tasks";
 
 type TaskFormProps = {
@@ -21,6 +22,7 @@ type TaskFormProps = {
 
 export function TaskForm({ onSuccess, onCancel, defaultValues }: TaskFormProps) {
   const { users, fetchUsers, createTask, loading } = useTaskStore();
+  const { handleAsyncError } = useErrorStore();
 
   const form = useForm<CreateTaskInput>({
     resolver: zodResolver(CreateTaskSchema),
@@ -44,7 +46,7 @@ export function TaskForm({ onSuccess, onCancel, defaultValues }: TaskFormProps) 
       onSuccess?.();
     }
     catch (error) {
-      console.error("Failed to create task:", error);
+      handleAsyncError(error, "Failed to create task");
     }
   };
 

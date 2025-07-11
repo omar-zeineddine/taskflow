@@ -5,21 +5,26 @@ import type { CreateTaskRequest, Task, TaskWithAssignee, UpdateTaskRequest, User
 
 import { supabase } from "@/lib/supabase";
 import { TaskService } from "@/services/tasks";
+import { useErrorStore } from "@/stores/error";
 
 type TaskState = {
   tasks: TaskWithAssignee[];
   users: User[];
-  loading: boolean;
+  loading: boolean; // For initial fetch and create operations
   usersLoading: boolean;
   error: string | null;
   recentlyUpdatedTasks: Set<string>;
   filters: TaskFilters;
+  operationLoading: {
+    updating: Set<string>; // Track which tasks are being updated
+    deleting: Set<string>; // Track which tasks are being deleted
+  };
 
   // Actions
   fetchTasks: () => Promise<void>;
   fetchUsers: () => Promise<void>;
   createTask: (taskData: CreateTaskRequest) => Promise<Task>;
-  updateTask: (id: string, taskData: UpdateTaskRequest) => Promise<Task>;
+  updateTask: (id: string, taskData: UpdateTaskRequest, silent?: boolean) => Promise<Task>;
   deleteTask: (id: string) => Promise<void>;
   getTaskById: (id: string) => TaskWithAssignee | undefined;
   clearError: () => void;
@@ -27,6 +32,8 @@ type TaskState = {
   markTaskAsRecentlyUpdated: (id: string) => void;
   setFilters: (filters: TaskFilters) => void;
   getFilteredTasks: () => TaskWithAssignee[];
+  isTaskUpdating: (id: string) => boolean;
+  isTaskDeleting: (id: string) => boolean;
 };
 
 export const useTaskStore = create<TaskState>((set, get) => ({
@@ -42,6 +49,10 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     dateFrom: "",
     dateTo: "",
   },
+  operationLoading: {
+    updating: new Set(),
+    deleting: new Set(),
+  },
 
   fetchTasks: async () => {
     set({ loading: true, error: null });
@@ -50,10 +61,12 @@ export const useTaskStore = create<TaskState>((set, get) => ({
       set({ tasks, loading: false });
     }
     catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to fetch tasks";
       set({
-        error: error instanceof Error ? error.message : "Failed to fetch tasks",
+        error: errorMessage,
         loading: false,
       });
+      useErrorStore.getState().handleAsyncError(error, "Failed to fetch tasks");
     }
   },
 
@@ -71,10 +84,12 @@ export const useTaskStore = create<TaskState>((set, get) => ({
       set({ users: usersWithCreatedAt, usersLoading: false });
     }
     catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to fetch users";
       set({
-        error: error instanceof Error ? error.message : "Failed to fetch users",
+        error: errorMessage,
         usersLoading: false,
       });
+      useErrorStore.getState().handleAsyncError(error, "Failed to fetch users");
     }
   },
 
@@ -122,8 +137,16 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     }
   },
 
-  updateTask: async (id: string, taskData: UpdateTaskRequest) => {
-    set({ loading: true, error: null });
+  updateTask: async (id: string, taskData: UpdateTaskRequest, silent = false) => {
+    if (!silent) {
+      set(state => ({
+        operationLoading: {
+          ...state.operationLoading,
+          updating: new Set([...state.operationLoading.updating, id]),
+        },
+        error: null,
+      }));
+    }
 
     // Optimistic update - update UI immediately
     const previousTasks = get().tasks;
@@ -135,22 +158,48 @@ export const useTaskStore = create<TaskState>((set, get) => ({
 
     try {
       const updatedTask = await TaskService.updateTask(id, taskData);
-      set({ loading: false });
+
+      if (!silent) {
+        set((state) => {
+          const newUpdating = new Set(state.operationLoading.updating);
+          newUpdating.delete(id);
+          return {
+            operationLoading: {
+              ...state.operationLoading,
+              updating: newUpdating,
+            },
+          };
+        });
+      }
+
       return updatedTask;
     }
     catch (error) {
       // Revert optimistic update on error
-      set({
-        tasks: previousTasks,
-        error: error instanceof Error ? error.message : "Failed to update task",
-        loading: false,
+      set((state) => {
+        const newUpdating = new Set(state.operationLoading.updating);
+        newUpdating.delete(id);
+        return {
+          tasks: previousTasks,
+          error: error instanceof Error ? error.message : "Failed to update task",
+          operationLoading: {
+            ...state.operationLoading,
+            updating: newUpdating,
+          },
+        };
       });
       throw error;
     }
   },
 
   deleteTask: async (id: string) => {
-    set({ loading: true, error: null });
+    set(state => ({
+      operationLoading: {
+        ...state.operationLoading,
+        deleting: new Set([...state.operationLoading.deleting, id]),
+      },
+      error: null,
+    }));
 
     // Optimistic delete - remove from UI immediately
     const previousTasks = get().tasks;
@@ -160,14 +209,31 @@ export const useTaskStore = create<TaskState>((set, get) => ({
 
     try {
       await TaskService.deleteTask(id);
-      set({ loading: false });
+
+      set((state) => {
+        const newDeleting = new Set(state.operationLoading.deleting);
+        newDeleting.delete(id);
+        return {
+          operationLoading: {
+            ...state.operationLoading,
+            deleting: newDeleting,
+          },
+        };
+      });
     }
     catch (error) {
       // Revert optimistic delete on error
-      set({
-        tasks: previousTasks,
-        error: error instanceof Error ? error.message : "Failed to delete task",
-        loading: false,
+      set((state) => {
+        const newDeleting = new Set(state.operationLoading.deleting);
+        newDeleting.delete(id);
+        return {
+          tasks: previousTasks,
+          error: error instanceof Error ? error.message : "Failed to delete task",
+          operationLoading: {
+            ...state.operationLoading,
+            deleting: newDeleting,
+          },
+        };
       });
       throw error;
     }
@@ -301,5 +367,13 @@ export const useTaskStore = create<TaskState>((set, get) => ({
 
       return true;
     });
+  },
+
+  isTaskUpdating: (id: string) => {
+    return get().operationLoading.updating.has(id);
+  },
+
+  isTaskDeleting: (id: string) => {
+    return get().operationLoading.deleting.has(id);
   },
 }));
