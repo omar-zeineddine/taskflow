@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
 import { useEffect } from "react";
 
 import { ResetPasswordForm } from "@/components/auth/reset-password-form";
@@ -6,12 +6,50 @@ import { supabase } from "@/lib/supabase";
 
 export const Route = createFileRoute("/auth/reset-password")({
   component: ResetPassword,
+  validateSearch: (search: Record<string, unknown>) => {
+    return {
+      token: (search.token as string) || "",
+      type: (search.type as string) || "",
+      error: (search.error as string) || "",
+      error_description: (search.error_description as string) || "",
+    };
+  },
 });
 
 function ResetPassword() {
+  const search = useSearch({ from: "/auth/reset-password" });
+
   useEffect(() => {
-    // Handle the recovery session from URL hash
     const handleRecoverySession = async () => {
+      // Check for error in URL first
+      if (search.error) {
+        console.error("Recovery error:", search.error, search.error_description);
+        return;
+      }
+
+      // Method 1: token from URL query parameters (Supabase email link format)
+      if (search.token && search.type === "recovery") {
+        try {
+          const { error } = await supabase.auth.verifyOtp({
+            token_hash: search.token,
+            type: "recovery",
+          });
+
+          if (error) {
+            console.error("Error verifying recovery token:", error);
+          }
+          else {
+            // Clear the URL parameters for security
+            window.history.replaceState(null, "", window.location.pathname);
+          }
+        }
+        catch (err) {
+          console.error("Recovery token verification error:", err);
+        }
+        return;
+      }
+
+      // Method 2: Handle tokens from URL hash (alternative format)
       const hashParams = new URLSearchParams(window.location.hash.substring(1));
       const accessToken = hashParams.get("access_token");
       const refreshToken = hashParams.get("refresh_token");
@@ -39,7 +77,7 @@ function ResetPassword() {
     };
 
     handleRecoverySession();
-  }, []);
+  }, [search]);
 
   return (
     <div className="flex items-center justify-center min-h-[calc(100vh-200px)]">
