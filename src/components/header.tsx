@@ -100,21 +100,24 @@ export function Header() {
               >
                 Home
               </Link>
-              <Link
-                to="/about"
-                className="text-base font-medium transition-colors hover:text-foreground hover:bg-accent text-foreground/80 py-2 px-2 rounded-md -mx-2"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                About
-              </Link>
               {user && (
-                <Link
-                  to="/dashboard"
-                  className="text-base font-medium transition-colors hover:text-foreground hover:bg-accent text-foreground/80 py-2 px-2 rounded-md -mx-2"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Dashboard
-                </Link>
+                <>
+                  <Link
+                    to="/dashboard"
+                    className="text-base font-medium transition-colors hover:text-foreground hover:bg-accent text-foreground/80 py-2 px-2 rounded-md -mx-2"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Dashboard
+                  </Link>
+
+                  <Link
+                    to="/tasks"
+                    className="text-base font-medium transition-colors hover:text-foreground hover:bg-accent text-foreground/80 py-2 px-2 rounded-md -mx-2"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Tasks
+                  </Link>
+                </>
               )}
               <div className="flex flex-col space-y-3 pt-4 border-t px-2">
                 {user

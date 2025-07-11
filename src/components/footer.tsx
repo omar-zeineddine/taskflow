@@ -10,7 +10,7 @@ export function Footer() {
                 source code is available on
                 {" "}
                 <a
-                  href="https://github.com"
+                  href="https://github.com/omar-zeineddine/taskflow"
                   target="_blank"
                   rel="noreferrer"
                   className="font-medium underline underline-offset-4 hover:text-foreground transition-colors"
