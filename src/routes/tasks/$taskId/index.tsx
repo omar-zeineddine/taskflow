@@ -6,7 +6,7 @@ import { ProtectedRoute } from "@/components/auth/protected-route";
 import { TaskEditModal } from "@/components/tasks/task-edit-modal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { getStatusColor } from "@/lib/utils";
+import { formatDate, formatDateShort, getStatusColor } from "@/lib/utils";
 import { useTaskStore } from "@/stores/tasks";
 
 export const Route = createFileRoute("/tasks/$taskId/")({
@@ -93,7 +93,7 @@ function TaskDetailPage() {
                   <span className="text-sm text-muted-foreground">
                     Created
                     {" "}
-                    {new Date(task.created_at).toLocaleDateString()}
+                    {formatDateShort(task.created_at)}
                   </span>
                 </div>
               </div>
@@ -194,21 +194,13 @@ function TaskDetailPage() {
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-medium text-foreground">Created</span>
                       <span className="text-sm text-muted-foreground">
-                        {new Date(task.created_at).toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                        })}
+                        {formatDate(task.created_at)}
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-medium text-foreground">Last updated</span>
                       <span className="text-sm text-muted-foreground">
-                        {new Date(task.updated_at).toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                        })}
+                        {formatDate(task.updated_at)}
                       </span>
                     </div>
                   </div>

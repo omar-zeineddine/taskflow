@@ -9,7 +9,7 @@ import type { TaskWithAssignee } from "@/types/task";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { getStatusColor } from "@/lib/utils";
+import { formatDate, getStatusColor } from "@/lib/utils";
 import { useTaskStore } from "@/stores/tasks";
 
 import { TaskEditModal } from "./task-edit-modal";
@@ -63,15 +63,6 @@ function TaskCard({ task, isDragging }: { task: TaskWithAssignee; isDragging: bo
     e.stopPropagation();
     e.preventDefault();
     setShowDeleteConfirm(false);
-  };
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
   };
 
   if (showDeleteConfirm) {

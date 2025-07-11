@@ -4,7 +4,7 @@ import type { TaskWithAssignee } from "@/types/task";
 
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { getStatusColor } from "@/lib/utils";
+import { formatDateShort, getStatusColor } from "@/lib/utils";
 
 type TaskCardProps = {
   task: TaskWithAssignee;
@@ -70,7 +70,7 @@ export function TaskCard({
         <div className="text-xs text-muted-foreground">
           Created:
           {" "}
-          {new Date(task.created_at).toLocaleDateString()}
+          {formatDateShort(task.created_at)}
         </div>
       </div>
     </div>

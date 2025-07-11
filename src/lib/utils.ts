@@ -19,3 +19,47 @@ export function getStatusColor(status: string) {
       return "bg-secondary text-secondary-foreground border-secondary";
   }
 }
+
+// Date formatting utilities
+export function formatDate(dateString: string) {
+  const date = new Date(dateString);
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
+export function formatDateShort(dateString: string) {
+  const date = new Date(dateString);
+  return date.toLocaleDateString();
+}
+
+export function formatDateLong(dateString: string) {
+  const date = new Date(dateString);
+  return date.toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
+// Optimistic update utilities
+export function generateOptimisticId() {
+  return `temp-${Date.now()}`;
+}
+
+export function isOptimisticId(id: string) {
+  return id.startsWith("temp-");
+}
+
+export function createOptimisticItem<T>(data: Partial<T>): T & { id: string; created_at: string; updated_at: string } {
+  const now = new Date().toISOString();
+  return {
+    ...data,
+    id: generateOptimisticId(),
+    created_at: now,
+    updated_at: now,
+  } as T & { id: string; created_at: string; updated_at: string };
+}
