@@ -87,10 +87,10 @@ export function ResetPasswordForm() {
           )}
         />
         {error && (
-          <div className="text-red-500 text-sm">{error}</div>
+          <div className="text-destructive text-sm">{error}</div>
         )}
         {success && (
-          <div className="text-green-500 text-sm">{success}</div>
+          <div className="text-green-600 dark:text-green-400 text-sm">{success}</div>
         )}
         <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading ? "Updating..." : "Update Password"}

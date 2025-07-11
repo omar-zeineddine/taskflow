@@ -96,7 +96,7 @@ export function RegisterForm() {
           )}
         />
         {error && (
-          <div className="text-red-500 text-sm">{error}</div>
+          <div className="text-destructive text-sm">{error}</div>
         )}
         <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading ? "Creating account..." : "Create Account"}

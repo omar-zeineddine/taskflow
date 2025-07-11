@@ -160,8 +160,13 @@ export const useAuthStore = create<AuthState>()(
       resetPassword: async (email: string) => {
         set({ isLoading: true });
         try {
+          // Use environment-aware redirect URL
+          const redirectTo = import.meta.env.PROD
+            ? "https://taskflow-one-omega.vercel.app/auth/reset-password"
+            : "http://localhost:5173/auth/reset-password";
+
           const { error } = await supabase.auth.resetPasswordForEmail(email, {
-            redirectTo: `${window.location.origin}/auth/reset-password`,
+            redirectTo,
           });
 
           set({ isLoading: false });

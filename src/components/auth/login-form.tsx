@@ -81,7 +81,7 @@ export function LoginForm() {
           )}
         />
         {error && (
-          <div className="text-red-500 text-sm">{error}</div>
+          <div className="text-destructive text-sm">{error}</div>
         )}
         <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading ? "Signing in..." : "Sign In"}
@@ -89,7 +89,7 @@ export function LoginForm() {
         <div className="text-center">
           <Link
             to="/auth/forgot-password"
-            className="text-sm text-blue-600 hover:text-blue-500"
+            className="text-sm font-medium text-primary hover:text-primary/80"
           >
             Forgot your password?
           </Link>

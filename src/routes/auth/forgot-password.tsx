@@ -11,10 +11,10 @@ function ForgotPassword() {
     <div className="flex items-center justify-center min-h-[calc(100vh-200px)]">
       <div className="max-w-md w-full space-y-8">
         <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-foreground">
             Forgot your password?
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
+          <p className="mt-2 text-center text-sm text-muted-foreground">
             Enter your email address and we'll send you a link to reset your password.
           </p>
         </div>
@@ -23,7 +23,7 @@ function ForgotPassword() {
           <div className="text-center">
             <Link
               to="/auth/login"
-              className="text-sm text-blue-600 hover:text-blue-500"
+              className="font-medium text-primary hover:text-primary/80"
             >
               Back to login
             </Link>
