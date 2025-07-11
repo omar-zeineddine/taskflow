@@ -16,7 +16,7 @@ export const Route = createRootRoute({
               <Outlet />
             </ErrorBoundary>
             <ToastContainer />
-            <TanStackRouterDevtools />
+            {import.meta.env.DEV && <TanStackRouterDevtools />}
           </Layout>
         </AuthProvider>
       </ErrorBoundary>
