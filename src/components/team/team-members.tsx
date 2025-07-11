@@ -4,11 +4,14 @@ import { useEffect } from "react";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { OnlineIndicator } from "@/components/ui/online-indicator";
 import { TeamMembersSkeleton } from "@/components/ui/skeleton";
+import { usePresenceStore } from "@/stores/presence";
 import { useTaskStore } from "@/stores/tasks";
 
 export function TeamMembers() {
   const { users, usersLoading, fetchUsers, tasks } = useTaskStore();
+  const { isUserOnline, onlineUsers } = usePresenceStore();
 
   useEffect(() => {
     fetchUsers();
@@ -35,12 +38,14 @@ export function TeamMembers() {
     ).length;
     const unassignedTasks = tasks.filter(task => !task.assignee_id).length;
     const averageTasksPerMember = totalMembers > 0 ? Math.round(tasks.length / totalMembers) : 0;
+    const onlineMembersCount = onlineUsers.length;
 
     return {
       totalMembers,
       membersWithTasks,
       unassignedTasks,
       averageTasksPerMember,
+      onlineMembersCount,
     };
   };
 
@@ -66,10 +71,14 @@ export function TeamMembers() {
       </CardHeader>
       <CardContent>
         {/* Team Statistics */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6 p-4 bg-muted/50 rounded-lg">
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6 p-4 bg-muted/50 rounded-lg">
           <div className="text-center">
             <div className="text-2xl font-bold text-primary">{teamStats.totalMembers}</div>
             <div className="text-xs text-muted-foreground">Total Members</div>
+          </div>
+          <div className="text-center">
+            <div className="text-2xl font-bold text-green-600">{teamStats.onlineMembersCount}</div>
+            <div className="text-xs text-muted-foreground">Online Now</div>
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold text-blue-600">{teamStats.membersWithTasks}</div>
@@ -80,7 +89,7 @@ export function TeamMembers() {
             <div className="text-xs text-muted-foreground">Unassigned Tasks</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-green-600">{teamStats.averageTasksPerMember}</div>
+            <div className="text-2xl font-bold text-purple-600">{teamStats.averageTasksPerMember}</div>
             <div className="text-xs text-muted-foreground">Avg Tasks/Member</div>
           </div>
         </div>
@@ -95,10 +104,20 @@ export function TeamMembers() {
                 className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-accent/50 transition-colors"
               >
                 <div className="flex items-center gap-3">
-                  <Avatar name={user.name} email={user.email} size="md" />
+                  <div className="relative">
+                    <Avatar name={user.name} email={user.email} size="md" />
+                    <div className="absolute -bottom-1 -right-1">
+                      <OnlineIndicator isOnline={isUserOnline(user.id)} size="sm" />
+                    </div>
+                  </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
                       <h4 className="font-medium text-sm">{user.name}</h4>
+                      {isUserOnline(user.id) && (
+                        <Badge variant="default" className="text-xs bg-green-100 text-green-800 border-green-200">
+                          Online
+                        </Badge>
+                      )}
                       {stats.total > 0 && (
                         <Badge variant="secondary" className="text-xs">
                           {stats.total}
