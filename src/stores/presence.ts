@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-import type { PresenceState, UserPresence, UserWithPresence } from "@/types/presence";
+import type { PresenceState, UserPresence } from "@/types/presence";
 
 import { supabase } from "@/lib/supabase";
 import { PresenceService } from "@/services/presence";

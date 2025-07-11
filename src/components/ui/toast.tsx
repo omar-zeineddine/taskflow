@@ -1,5 +1,4 @@
 import { AlertCircle, CheckCircle, Info, X } from "lucide-react";
-import React from "react";
 
 import type { AppError } from "@/stores/error";
 
