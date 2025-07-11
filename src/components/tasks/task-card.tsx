@@ -9,7 +9,7 @@ type TaskCardProps = {
   task: TaskWithAssignee;
   isDragging?: boolean;
   isRecentlyUpdated?: boolean;
-  setIsEditModalOpen: (isOpen: boolean) => void;
+  setIsEditModalOpen: (open: boolean) => void;
   setShowDeleteConfirm: (show: boolean) => void;
   isDeleting: boolean;
 };
@@ -25,33 +25,33 @@ export function TaskCard({
   const getStatusColor = (status: string) => {
     switch (status) {
       case "To Do":
-        return "bg-gray-100 text-gray-800";
+        return "bg-secondary text-secondary-foreground";
       case "In Progress":
-        return "bg-blue-100 text-blue-800";
+        return "bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary-foreground";
       case "Done":
-        return "bg-green-100 text-green-800";
+        return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400";
       default:
-        return "bg-gray-100 text-gray-800";
+        return "bg-secondary text-secondary-foreground";
     }
   };
 
   return (
     <div
-      className={`border rounded-lg p-3 lg:p-4 space-y-2 lg:space-y-3 bg-white transition-all duration-300 ${isDragging ? "shadow-lg" : ""} ${isRecentlyUpdated ? "ring-2 ring-blue-400 shadow-md" : ""}`}
+      className={`border border-border rounded-lg p-3 lg:p-4 space-y-2 lg:space-y-3 bg-card transition-all duration-300 ${isDragging ? "shadow-lg" : ""} ${isRecentlyUpdated ? "ring-2 ring-primary/50 shadow-md ring-offset-background" : ""}`}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
-          <h3 className="font-medium text-base lg:text-lg truncate">{task.title}</h3>
+          <h3 className="font-medium text-base lg:text-lg truncate text-foreground">{task.title}</h3>
           {task.description && <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{task.description}</p>}
         </div>
         <div className="flex items-center space-x-1 flex-shrink-0">
-          <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setIsEditModalOpen(true)}>
+          <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-accent" onClick={() => setIsEditModalOpen(true)}>
             <Edit className="h-3 w-3 lg:h-4 lg:w-4" />
           </Button>
           <Button
             variant="ghost"
             size="sm"
-            className="h-8 w-8 p-0"
+            className="h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive"
             onClick={() => setShowDeleteConfirm(true)}
             disabled={isDeleting}
           >

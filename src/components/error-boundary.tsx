@@ -1,67 +1,51 @@
+import type { ErrorInfo, ReactNode } from "react";
+
 import { AlertTriangle, RefreshCw } from "lucide-react";
-import React from "react";
+import { Component } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
+type ErrorBoundaryProps = {
+  children: ReactNode;
+  fallback?: (error: Error, reset: () => void) => ReactNode;
+};
+
 type ErrorBoundaryState = {
   hasError: boolean;
   error: Error | null;
-  errorInfo: React.ErrorInfo | null;
 };
 
-type ErrorBoundaryProps = {
-  children: React.ReactNode;
-  fallback?: React.ComponentType<{ error: Error; reset: () => void }>;
-  onError?: (error: Error, errorInfo: React.ErrorInfo) => void;
-};
-
-export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   constructor(props: ErrorBoundaryProps) {
     super(props);
-    this.state = { hasError: false, error: null, errorInfo: null };
+    this.state = { hasError: false, error: null };
   }
 
   static getDerivedStateFromError(error: Error): ErrorBoundaryState {
-    return {
-      hasError: true,
-      error,
-      errorInfo: null,
-    };
+    return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    this.setState({
-      error,
-      errorInfo,
-    });
-
-    // Log error to console in development
-    if (import.meta.env.DEV) {
-      console.error("Error caught by boundary:", error, errorInfo);
-    }
-
-    // Call custom error handler if provided
-    this.props.onError?.(error, errorInfo);
-
-    // In production, you would send this to your error tracking service
-    // Example: Sentry.captureException(error, { extra: errorInfo });
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error("Error caught by boundary:", error, errorInfo);
   }
 
-  handleReset = () => {
-    this.setState({ hasError: false, error: null, errorInfo: null });
+  reset = () => {
+    this.setState({ hasError: false, error: null });
   };
 
   render() {
-    if (this.state.hasError) {
-      // Use custom fallback if provided
+    if (this.state.hasError && this.state.error) {
       if (this.props.fallback) {
-        const FallbackComponent = this.props.fallback;
-        return <FallbackComponent error={this.state.error!} reset={this.handleReset} />;
+        return this.props.fallback(this.state.error, this.reset);
       }
 
-      // Default fallback UI
-      return <DefaultErrorFallback error={this.state.error!} reset={this.handleReset} />;
+      return (
+        <DefaultErrorFallback
+          error={this.state.error}
+          reset={this.reset}
+        />
+      );
     }
 
     return this.props.children;
@@ -78,8 +62,8 @@ function DefaultErrorFallback({ error, reset }: DefaultErrorFallbackProps) {
     <div className="flex items-center justify-center min-h-[400px] p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
-            <AlertTriangle className="h-6 w-6 text-red-600" />
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
+            <AlertTriangle className="h-6 w-6 text-destructive" />
           </div>
           <CardTitle className="text-lg">Something went wrong</CardTitle>
           <CardDescription>
@@ -88,11 +72,11 @@ function DefaultErrorFallback({ error, reset }: DefaultErrorFallbackProps) {
         </CardHeader>
         <CardContent className="space-y-4">
           {import.meta.env.DEV && (
-            <details className="rounded-md bg-gray-50 p-3 text-sm">
-              <summary className="cursor-pointer font-medium text-gray-700">
+            <details className="rounded-md bg-muted p-3 text-sm">
+              <summary className="cursor-pointer font-medium text-foreground">
                 Error details (dev only)
               </summary>
-              <pre className="mt-2 whitespace-pre-wrap text-xs text-gray-600">
+              <pre className="mt-2 whitespace-pre-wrap text-xs text-muted-foreground">
                 {error.message}
                 {error.stack}
               </pre>

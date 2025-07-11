@@ -27,9 +27,9 @@ function TasksPage() {
         </div>
 
         {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
             <div className="flex justify-between items-center">
-              <p className="text-red-700">{error}</p>
+              <p className="text-destructive">{error}</p>
               <Button variant="ghost" size="sm" onClick={clearError}>
                 Dismiss
               </Button>

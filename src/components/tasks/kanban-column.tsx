@@ -1,12 +1,12 @@
 import { useDroppable } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 
-import type { TaskStatus, TaskWithAssignee } from "@/types/task";
+import type { TaskWithAssignee } from "@/types/task";
 
 import { SortableTaskCard } from "./sortable-task-card";
 
 type KanbanColumnProps = {
-  column: { id: TaskStatus; title: string };
+  column: { id: string; title: string };
   tasks: TaskWithAssignee[];
 };
 
@@ -18,13 +18,13 @@ export function KanbanColumn({ column, tasks }: KanbanColumnProps) {
   return (
     <div
       ref={setNodeRef}
-      className={`flex flex-col h-full min-w-0 bg-white border border-gray-200 rounded-lg p-4 shadow-sm transition-colors duration-200 ${
-        isOver ? "bg-blue-50 border-blue-300" : ""
+      className={`flex flex-col h-full min-w-0 bg-card border border-border rounded-lg p-4 shadow-sm transition-colors duration-200 ${
+        isOver ? "bg-primary/5 border-primary/30" : ""
       }`}
     >
       <div className="flex items-center justify-between mb-4 flex-shrink-0">
-        <h3 className="font-semibold text-gray-700">{column.title}</h3>
-        <span className="text-sm text-gray-500 bg-gray-200 px-2 py-1 rounded">{tasks.length}</span>
+        <h3 className="font-semibold text-foreground">{column.title}</h3>
+        <span className="text-sm text-muted-foreground bg-muted px-2 py-1 rounded">{tasks.length}</span>
       </div>
 
       <div className="flex-1 min-h-32 space-y-3 overflow-y-auto">
@@ -36,11 +36,11 @@ export function KanbanColumn({ column, tasks }: KanbanColumnProps) {
 
         {/* Empty drop zone for better UX */}
         {tasks.length === 0 && (
-          <div className={`flex items-center justify-center h-32 border-2 border-dashed border-gray-300 rounded-lg transition-colors duration-200 ${
-            isOver ? "border-blue-400 bg-blue-50" : ""
+          <div className={`flex items-center justify-center h-32 border-2 border-dashed border-border rounded-lg transition-colors duration-200 ${
+            isOver ? "border-primary/50 bg-primary/5" : ""
           }`}
           >
-            <p className="text-sm text-gray-500">Drop tasks here</p>
+            <p className="text-sm text-muted-foreground">Drop tasks here</p>
           </div>
         )}
       </div>

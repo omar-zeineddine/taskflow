@@ -67,13 +67,13 @@ function TaskCard({ task, isDragging }: { task: TaskWithAssignee; isDragging: bo
   const getStatusColor = (status: string) => {
     switch (status) {
       case "To Do":
-        return "bg-slate-100 text-slate-700 border-slate-200";
+        return "bg-secondary text-secondary-foreground border-border";
       case "In Progress":
-        return "bg-blue-100 text-blue-700 border-blue-200";
+        return "bg-primary/10 text-primary border-primary/20 dark:bg-primary/20 dark:text-primary-foreground";
       case "Done":
-        return "bg-green-100 text-green-700 border-green-200";
+        return "bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800";
       default:
-        return "bg-slate-100 text-slate-700 border-slate-200";
+        return "bg-secondary text-secondary-foreground border-border";
     }
   };
 
@@ -88,15 +88,15 @@ function TaskCard({ task, isDragging }: { task: TaskWithAssignee; isDragging: bo
 
   if (showDeleteConfirm) {
     return (
-      <Card className="border-red-200 bg-red-50 shadow-sm">
+      <Card className="border-destructive/50 bg-destructive/5 shadow-sm">
         <CardContent className="p-6">
           <div className="text-center space-y-4">
             <div className="space-y-2">
-              <h3 className="font-semibold text-lg text-red-800">Delete Task</h3>
-              <p className="text-sm text-red-600 leading-relaxed">
+              <h3 className="font-semibold text-lg text-destructive">Delete Task</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">
                 Are you sure you want to delete
                 {" "}
-                <span className="font-medium">
+                <span className="font-medium text-foreground">
                   "
                   {task.title}
                   "
@@ -111,7 +111,7 @@ function TaskCard({ task, isDragging }: { task: TaskWithAssignee; isDragging: bo
                 size="sm"
                 onClick={handleCancelDelete}
                 disabled={isDeleting}
-                className="min-w-20 bg-transparent"
+                className="min-w-20"
               >
                 Cancel
               </Button>
@@ -130,13 +130,13 @@ function TaskCard({ task, isDragging }: { task: TaskWithAssignee; isDragging: bo
       <Card
         className={`group transition-all duration-200 ${
           isDragging ? "opacity-60 shadow-xl scale-105 rotate-2" : "hover:shadow-md hover:-translate-y-0.5"
-        } ${isTaskCurrentlyUpdating ? "opacity-75 ring-2 ring-blue-200 ring-offset-1" : ""} ${
-          isTaskCurrentlyDeleting ? "opacity-50 ring-2 ring-red-200 ring-offset-1" : ""
+        } ${isTaskCurrentlyUpdating ? "opacity-75 ring-2 ring-primary/50 ring-offset-1 ring-offset-background" : ""} ${
+          isTaskCurrentlyDeleting ? "opacity-50 ring-2 ring-destructive/50 ring-offset-1 ring-offset-background" : ""
         }`}
       >
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between gap-3">
-            <h4 className="font-semibold text-base leading-snug line-clamp-2 text-gray-900">{task.title}</h4>
+            <h4 className="font-semibold text-base leading-snug line-clamp-2 text-foreground">{task.title}</h4>
             <div
               className={`flex gap-1 ${
                 isDragging
@@ -145,14 +145,14 @@ function TaskCard({ task, isDragging }: { task: TaskWithAssignee; isDragging: bo
               }`}
             >
               <Link to="/tasks/$taskId" params={{ taskId: task.id }}>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-gray-100" disabled={isDragging}>
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-accent" disabled={isDragging}>
                   <ExternalLink className="h-4 w-4" />
                 </Button>
               </Link>
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 w-8 p-0 hover:bg-gray-100"
+                className="h-8 w-8 p-0 hover:bg-accent"
                 onClick={handleEdit}
                 disabled={isDragging}
               >
@@ -161,7 +161,7 @@ function TaskCard({ task, isDragging }: { task: TaskWithAssignee; isDragging: bo
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 w-8 p-0 hover:bg-red-50 hover:text-red-600"
+                className="h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive"
                 onClick={handleDelete}
                 disabled={isDragging}
               >
@@ -172,15 +172,15 @@ function TaskCard({ task, isDragging }: { task: TaskWithAssignee; isDragging: bo
         </CardHeader>
 
         <CardContent className="pt-0 space-y-4">
-          {task.description && <p className="text-sm text-gray-600 line-clamp-3 leading-relaxed">{task.description}</p>}
+          {task.description && <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed">{task.description}</p>}
 
           <div className="flex items-center justify-between gap-2">
-            <Badge variant="secondary" className={`text-sm font-medium px-3 py-1 ${getStatusColor(task.status)}`}>
+            <Badge variant="secondary" className={`text-sm font-medium px-3 py-1 border ${getStatusColor(task.status)}`}>
               {task.status}
             </Badge>
 
             {task.assignee && (
-              <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 rounded-full px-3 py-1">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted rounded-full px-3 py-1">
                 <User className="h-4 w-4 flex-shrink-0" />
                 <span className="truncate max-w-24 font-medium" title={task.assignee.name || task.assignee.email}>
                   {task.assignee.name || task.assignee.email}
@@ -190,7 +190,7 @@ function TaskCard({ task, isDragging }: { task: TaskWithAssignee; isDragging: bo
           </div>
 
           {task.created_at && (
-            <div className="flex items-center gap-2 text-sm text-gray-500 pt-1">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground pt-1">
               <Calendar className="h-4 w-4 flex-shrink-0" />
               <span title={formatDate(task.created_at)}>{formatDate(task.created_at)}</span>
             </div>

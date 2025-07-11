@@ -30,13 +30,13 @@ export function Toast({ error }: ToastProps) {
   const getStyles = () => {
     switch (error.type) {
       case "error":
-        return "border-red-200 bg-red-50 text-red-800";
+        return "border-destructive/20 bg-destructive/10 text-destructive";
       case "warning":
-        return "border-yellow-200 bg-yellow-50 text-yellow-800";
+        return "border-yellow-500/20 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400";
       case "info":
-        return "border-blue-200 bg-blue-50 text-blue-800";
+        return "border-primary/20 bg-primary/10 text-primary";
       default:
-        return "border-green-200 bg-green-50 text-green-800";
+        return "border-green-500/20 bg-green-500/10 text-green-600 dark:text-green-400";
     }
   };
 
@@ -59,7 +59,7 @@ export function Toast({ error }: ToastProps) {
                 size="sm"
                 variant="ghost"
                 onClick={error.action.handler}
-                className="h-6 px-2 text-xs"
+                className="h-6 px-2 text-xs hover:bg-background/20"
               >
                 {error.action.label}
               </Button>
@@ -68,7 +68,7 @@ export function Toast({ error }: ToastProps) {
               size="sm"
               variant="ghost"
               onClick={() => removeError(error.id)}
-              className="h-6 w-6 p-0"
+              className="h-6 w-6 p-0 hover:bg-background/20"
             >
               <X className="h-3 w-3" />
             </Button>
@@ -82,11 +82,12 @@ export function Toast({ error }: ToastProps) {
 export function ToastContainer() {
   const { errors } = useErrorStore();
 
-  if (errors.length === 0)
+  if (errors.length === 0) {
     return null;
+  }
 
   return (
-    <div className="fixed top-4 right-4 z-50 flex flex-col gap-2 max-w-sm">
+    <div className="fixed top-4 right-4 z-50 space-y-2">
       {errors.map(error => (
         <Toast key={error.id} error={error} />
       ))}
