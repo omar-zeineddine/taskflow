@@ -4,6 +4,8 @@ import { Link } from "@tanstack/react-router";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
 
+import { ChatNotification } from "@/components/chat-notification";
+import { OnlineUsersHeader } from "@/components/online-users-header";
 import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/stores/auth";
 
@@ -44,6 +46,12 @@ export function Header() {
 
           {/* Desktop Auth Actions */}
           <div className="hidden md:flex items-center space-x-4">
+            {user && (
+              <>
+                <OnlineUsersHeader />
+                <ChatNotification />
+              </>
+            )}
             <ModeToggle />
             {user
               ? (
