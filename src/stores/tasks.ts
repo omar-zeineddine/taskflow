@@ -73,6 +73,14 @@ export const useTaskStore = create<TaskState>((set, get) => ({
   fetchUsers: async () => {
     set({ usersLoading: true, error: null });
     try {
+      // Check if user is authenticated before proceeding
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (!user) {
+        set({ usersLoading: false });
+        return; // Exit early if no authenticated user
+      }
+
       // Ensure current user exists in the database
       await TaskService.ensureCurrentUserExists();
 

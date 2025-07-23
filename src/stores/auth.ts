@@ -11,7 +11,7 @@ export type AuthState = {
   isLoading: boolean;
   isInitialized: boolean;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
-  signUp: (email: string, password: string) => Promise<{ error: string | null }>;
+  signUp: (email: string, password: string) => Promise<{ error: string | null; requiresEmailConfirmation?: boolean }>;
   signOut: () => Promise<void>;
   initialize: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: string | null }>;
@@ -69,7 +69,7 @@ export const useAuthStore = create<AuthState>()(
       signUp: async (email: string, password: string) => {
         set({ isLoading: true });
         try {
-          const { error } = await supabase.auth.signUp({
+          const { data, error } = await supabase.auth.signUp({
             email,
             password,
           });
@@ -79,9 +79,25 @@ export const useAuthStore = create<AuthState>()(
             return { error: error.message };
           }
 
-          // Don't set user/session here - let onAuthStateChange handle it
-          set({ isLoading: false });
-          return { error: null };
+          // If signup is successful and user is confirmed, set the session
+          // This handles cases where email confirmation is disabled
+          if (data.user && data.session) {
+            set({
+              user: data.user,
+              session: data.session,
+              isLoading: false,
+            });
+            return { error: null };
+          }
+          else {
+            // If no session is returned, the user needs to confirm their email
+            // This is a success case, not an error
+            set({ isLoading: false });
+            return {
+              error: null,
+              requiresEmailConfirmation: true,
+            };
+          }
         }
         catch (err) {
           set({ isLoading: false });

@@ -1,14 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { BarChart3, CheckCircle, Clock, Users } from "lucide-react";
-import { useEffect } from "react";
 
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { TeamMembers } from "@/components/team/team-members";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DashboardStatsSkeleton } from "@/components/ui/skeleton";
+import { useTasks, useUsers } from "@/hooks/use-tasks";
 import { useAuthStore } from "@/stores/auth";
-import { useTaskStore } from "@/stores/tasks";
 
 export const Route = createFileRoute("/dashboard")({
   component: DashboardPage,
@@ -16,19 +15,15 @@ export const Route = createFileRoute("/dashboard")({
 
 function DashboardPage() {
   const { user } = useAuthStore();
-  const { tasks, loading, fetchTasks, fetchUsers } = useTaskStore();
-
-  useEffect(() => {
-    fetchTasks();
-    fetchUsers();
-  }, [fetchTasks, fetchUsers]);
+  const { data: tasks = [], isLoading: loading } = useTasks();
+  const { data: _users = [] } = useUsers();
 
   const getTaskStats = () => {
     const totalTasks = tasks.length;
-    const todoTasks = tasks.filter(task => task.status === "To Do").length;
-    const inProgressTasks = tasks.filter(task => task.status === "In Progress").length;
-    const doneTasks = tasks.filter(task => task.status === "Done").length;
-    const myTasks = tasks.filter(task => task.assignee_id === user?.id).length;
+    const todoTasks = tasks.filter((task: any) => task.status === "To Do").length;
+    const inProgressTasks = tasks.filter((task: any) => task.status === "In Progress").length;
+    const doneTasks = tasks.filter((task: any) => task.status === "Done").length;
+    const myTasks = tasks.filter((task: any) => task.assignee_id === user?.id).length;
 
     return {
       total: totalTasks,

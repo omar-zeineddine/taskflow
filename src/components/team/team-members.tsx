@@ -1,27 +1,23 @@
 import { Mail, Users } from "lucide-react";
-import { useEffect } from "react";
 
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { OnlineIndicator } from "@/components/ui/online-indicator";
 import { TeamMembersSkeleton } from "@/components/ui/skeleton";
+import { useTasks, useUsers } from "@/hooks/use-tasks";
 import { usePresenceStore } from "@/stores/presence";
-import { useTaskStore } from "@/stores/tasks";
 
 export function TeamMembers() {
-  const { users, usersLoading, fetchUsers, tasks } = useTaskStore();
+  const { data: users = [], isLoading: usersLoading } = useUsers();
+  const { data: tasks = [] } = useTasks();
   const { isUserOnline, onlineUsers } = usePresenceStore();
 
-  useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
-
   const getUserTaskStats = (userId: string) => {
-    const userTasks = tasks.filter(task => task.assignee_id === userId);
-    const todoCount = userTasks.filter(task => task.status === "To Do").length;
-    const inProgressCount = userTasks.filter(task => task.status === "In Progress").length;
-    const doneCount = userTasks.filter(task => task.status === "Done").length;
+    const userTasks = tasks.filter((task: any) => task.assignee_id === userId);
+    const todoCount = userTasks.filter((task: any) => task.status === "To Do").length;
+    const inProgressCount = userTasks.filter((task: any) => task.status === "In Progress").length;
+    const doneCount = userTasks.filter((task: any) => task.status === "Done").length;
 
     return {
       total: userTasks.length,

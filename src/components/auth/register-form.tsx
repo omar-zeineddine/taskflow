@@ -31,6 +31,7 @@ export function RegisterForm() {
   const { signUp, isLoading } = useAuthStore();
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   const form = useForm<RegisterForm>({
     resolver: zodResolver(registerSchema),
@@ -43,12 +44,18 @@ export function RegisterForm() {
 
   async function onSubmit(values: RegisterForm) {
     setError(null);
-    const { error } = await signUp(values.email, values.password);
+    setSuccess(null);
+    const { error, requiresEmailConfirmation } = await signUp(values.email, values.password);
 
     if (error) {
       setError(error);
     }
+    else if (requiresEmailConfirmation) {
+      setSuccess("Account created successfully! Please check your email to confirm your account before signing in.");
+      form.reset();
+    }
     else {
+      // User is automatically signed in (email confirmation disabled)
       navigate({ to: "/dashboard" });
     }
   }
@@ -97,6 +104,9 @@ export function RegisterForm() {
         />
         {error && (
           <div className="text-destructive text-sm">{error}</div>
+        )}
+        {success && (
+          <div className="text-green-600 dark:text-green-400 text-sm">{success}</div>
         )}
         <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading ? "Creating account..." : "Create Account"}

@@ -10,9 +10,9 @@ import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useUpdateTask, useUsers } from "@/hooks/use-tasks";
 import { UpdateTaskSchema } from "@/lib/validations/task";
 import { useErrorStore } from "@/stores/error";
-import { useTaskStore } from "@/stores/tasks";
 
 import { TaskModal } from "./task-modal";
 
@@ -23,9 +23,9 @@ type TaskEditModalProps = {
 };
 
 export function TaskEditModal({ task, isOpen, onClose }: TaskEditModalProps) {
-  const { users, fetchUsers, updateTask } = useTaskStore();
+  const { data: users = [] } = useUsers();
+  const updateTaskMutation = useUpdateTask();
   const { handleAsyncError } = useErrorStore();
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const form = useForm<UpdateTaskInput>({
     resolver: zodResolver(UpdateTaskSchema),
@@ -39,7 +39,6 @@ export function TaskEditModal({ task, isOpen, onClose }: TaskEditModalProps) {
 
   React.useEffect(() => {
     if (isOpen) {
-      fetchUsers();
       form.reset({
         title: task.title,
         description: task.description || "",
@@ -47,19 +46,15 @@ export function TaskEditModal({ task, isOpen, onClose }: TaskEditModalProps) {
         assignee_id: task.assignee_id || "",
       });
     }
-  }, [isOpen, task, fetchUsers, form]);
+  }, [isOpen, task, form]);
 
   const onSubmit = async (data: UpdateTaskInput) => {
-    setIsSubmitting(true);
     try {
-      await updateTask(task.id, data);
+      await updateTaskMutation.mutateAsync({ id: task.id, taskData: data });
       onClose();
     }
     catch (error) {
       handleAsyncError(error, "Failed to update task");
-    }
-    finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -82,7 +77,7 @@ export function TaskEditModal({ task, isOpen, onClose }: TaskEditModalProps) {
               <FormItem>
                 <FormLabel>Title</FormLabel>
                 <FormControl>
-                  <Input placeholder="Enter task title" {...field} disabled={isSubmitting} />
+                  <Input placeholder="Enter task title" {...field} disabled={updateTaskMutation.isPending} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -99,7 +94,7 @@ export function TaskEditModal({ task, isOpen, onClose }: TaskEditModalProps) {
                   <textarea
                     placeholder="Enter task description"
                     className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                    disabled={isSubmitting}
+                    disabled={updateTaskMutation.isPending}
                     {...field}
                   />
                 </FormControl>
@@ -117,7 +112,7 @@ export function TaskEditModal({ task, isOpen, onClose }: TaskEditModalProps) {
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value || undefined}
-                  disabled={isSubmitting}
+                  disabled={updateTaskMutation.isPending}
                 >
                   <FormControl>
                     <SelectTrigger className="w-full">
@@ -146,7 +141,7 @@ export function TaskEditModal({ task, isOpen, onClose }: TaskEditModalProps) {
                 <Select
                   onValueChange={value => field.onChange(value === "none" ? "" : value)}
                   defaultValue={field.value || "none"}
-                  disabled={isSubmitting}
+                  disabled={updateTaskMutation.isPending}
                 >
                   <FormControl>
                     <SelectTrigger className="w-full">
@@ -187,11 +182,11 @@ export function TaskEditModal({ task, isOpen, onClose }: TaskEditModalProps) {
           />
 
           <div className="flex justify-end space-x-2 pt-4">
-            <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>
+            <Button type="button" variant="outline" onClick={onClose} disabled={updateTaskMutation.isPending}>
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Updating..." : "Update Task"}
+            <Button type="submit" disabled={updateTaskMutation.isPending}>
+              {updateTaskMutation.isPending ? "Updating..." : "Update Task"}
             </Button>
           </div>
         </form>

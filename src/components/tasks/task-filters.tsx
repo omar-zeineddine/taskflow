@@ -1,6 +1,6 @@
 import { format } from "date-fns";
 import { CalendarIcon, ChevronDown, Filter, Search, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,8 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { useUsers } from "@/hooks/use-tasks";
 import { cn } from "@/lib/utils";
-import { useTaskStore } from "@/stores/tasks";
 
 export type TaskFilters = {
   search: string;
@@ -25,14 +25,9 @@ type TaskFiltersProps = {
 };
 
 export function TaskFilters({ filters, onFiltersChange }: TaskFiltersProps) {
-  const { users, fetchUsers } = useTaskStore();
+  const { data: users = [] } = useUsers();
   const [localFilters, setLocalFilters] = useState<TaskFilters>(filters);
   const [isExpanded, setIsExpanded] = useState(false);
-
-  // Fetch users when component mounts
-  useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
 
   const handleFilterChange = (key: keyof TaskFilters, value: string) => {
     const newFilters = { ...localFilters, [key]: value };

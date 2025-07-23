@@ -1,5 +1,4 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 
 import type { CreateTaskInput } from "@/lib/validations/task";
@@ -10,9 +9,9 @@ import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useCreateTask, useUsers } from "@/hooks/use-tasks";
 import { CreateTaskSchema } from "@/lib/validations/task";
 import { useErrorStore } from "@/stores/error";
-import { useTaskStore } from "@/stores/tasks";
 
 type TaskFormProps = {
   onSuccess?: () => void;
@@ -21,7 +20,8 @@ type TaskFormProps = {
 };
 
 export function TaskForm({ onSuccess, onCancel, defaultValues }: TaskFormProps) {
-  const { users, fetchUsers, createTask, loading } = useTaskStore();
+  const { data: users = [] } = useUsers();
+  const createTaskMutation = useCreateTask();
   const { handleAsyncError } = useErrorStore();
 
   const form = useForm<CreateTaskInput>({
@@ -35,13 +35,9 @@ export function TaskForm({ onSuccess, onCancel, defaultValues }: TaskFormProps) 
     },
   });
 
-  useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
-
   const onSubmit = async (data: CreateTaskInput) => {
     try {
-      await createTask(data);
+      await createTaskMutation.mutateAsync(data);
       form.reset();
       onSuccess?.();
     }
@@ -167,12 +163,12 @@ export function TaskForm({ onSuccess, onCancel, defaultValues }: TaskFormProps) 
 
         <div className="flex justify-end space-x-2 pt-4">
           {onCancel && (
-            <Button type="button" variant="outline" onClick={onCancel}>
+            <Button type="button" variant="outline" onClick={onCancel} disabled={createTaskMutation.isPending}>
               Cancel
             </Button>
           )}
-          <Button type="submit" disabled={loading}>
-            {loading ? "Creating..." : "Create Task"}
+          <Button type="submit" disabled={createTaskMutation.isPending}>
+            {createTaskMutation.isPending ? "Creating..." : "Create Task"}
           </Button>
         </div>
       </form>
